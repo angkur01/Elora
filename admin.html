@@ -3,15 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel</title>
+<title>Birthday Admin Panel</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
 body{
-margin:0;
 font-family:'Poppins',sans-serif;
-background:linear-gradient(135deg,#000,#2b2b2b);
+background:linear-gradient(135deg,#111,#2b2b2b);
 color:white;
 min-height:100vh;
 display:flex;
@@ -19,6 +20,7 @@ justify-content:center;
 align-items:center;
 padding:30px;
 }
+
 .panel{
 width:100%;
 max-width:900px;
@@ -26,10 +28,17 @@ background:rgba(255,255,255,0.05);
 backdrop-filter:blur(25px);
 border-radius:20px;
 padding:40px;
-box-shadow:0 20px 50px rgba(0,0,0,0.5);
+box-shadow:0 20px 60px rgba(0,0,0,0.6);
 }
+
 h1{text-align:center;margin-bottom:30px;}
-label{display:block;margin-top:20px;font-weight:600;}
+
+label{
+display:block;
+margin-top:18px;
+font-weight:600;
+}
+
 input, textarea{
 width:100%;
 margin-top:8px;
@@ -38,8 +47,14 @@ border-radius:12px;
 border:none;
 background:#1a1a1a;
 color:white;
+font-size:14px;
 }
-textarea{min-height:90px;}
+
+textarea{
+min-height:120px;
+resize:none;
+}
+
 .upload{
 margin-top:20px;
 padding:25px;
@@ -47,18 +62,45 @@ border:2px dashed #ff9ecb;
 border-radius:15px;
 text-align:center;
 cursor:pointer;
+transition:0.3s;
 }
+
+.upload:hover{
+background:rgba(255,182,193,0.1);
+}
+
 .preview{
 margin-top:15px;
 display:flex;
 flex-wrap:wrap;
-gap:10px;
+gap:15px;
 }
+
+.image-box{
+position:relative;
+}
+
 .preview img{
-width:90px;
-border-radius:10px;
+width:100px;
+border-radius:12px;
+box-shadow:0 10px 20px rgba(0,0,0,0.5);
 }
-button{
+
+.delete-btn{
+position:absolute;
+top:-8px;
+right:-8px;
+background:red;
+color:white;
+border:none;
+border-radius:50%;
+width:22px;
+height:22px;
+cursor:pointer;
+font-size:12px;
+}
+
+button.save{
 margin-top:25px;
 padding:12px 30px;
 border:none;
@@ -70,10 +112,16 @@ cursor:pointer;
 }
 </style>
 </head>
+
 <body>
 
 <div class="panel">
+
 <h1>Birthday Admin 👑</h1>
+
+<!-- INDEX CONTROLS -->
+<label>Hero Title</label>
+<input id="heroTitle">
 
 <label>Name</label>
 <input id="name">
@@ -84,39 +132,49 @@ cursor:pointer;
 <label>Birthday</label>
 <input type="date" id="birthday">
 
-<label>Hero Title</label>
-<input id="heroTitle">
+<label>Surprise Button Text</label>
+<input id="surpriseButton">
 
+<label>Cake Button Text</label>
+<input id="cakeButton">
+
+<!-- SURPRISE CONTROLS -->
 <label>Surprise Title</label>
 <input id="surpriseTitle">
 
-<label>Surprise Message</label>
+<label>Surprise Message (Long Letter)</label>
 <textarea id="surpriseMessage"></textarea>
 
+<!-- IMAGE UPLOAD -->
 <div class="upload" onclick="fileInput.click()">
-Upload Photos
+Upload Photos for Surprise Page
 </div>
 <input type="file" id="fileInput" multiple accept="image/*" style="display:none">
 
 <div class="preview" id="preview"></div>
 
-<button onclick="save()">Save Changes</button>
+<button class="save" onclick="save()">Save Changes</button>
 
 </div>
 
 <script>
+
+/* Default Data */
 let defaultData = {
+heroTitle:"Happy Birthday",
 name:"Elora Jannat",
 nickname:"Mashkura",
 birthday:"2009-03-09",
-heroTitle:"Happy Birthday",
+surpriseButton:"Open Your Surprise ✨",
+cakeButton:"Cut Your Cake 🎂",
 surpriseTitle:"For You 💌",
-surpriseMessage:"You are my safe place.",
+surpriseMessage:"Write your emotional letter here...",
 images:[]
 };
 
 let data = JSON.parse(localStorage.getItem("siteData")) || defaultData;
 
+/* Load Existing Data */
 function load(){
 for(let key in data){
 if(document.getElementById(key)){
@@ -129,13 +187,34 @@ renderImages();
 function renderImages(){
 let preview = document.getElementById("preview");
 preview.innerHTML="";
-data.images.forEach(img=>{
-let image=document.createElement("img");
-image.src=img;
-preview.appendChild(image);
+
+data.images.forEach((img,index)=>{
+let box = document.createElement("div");
+box.classList.add("image-box");
+
+let image = document.createElement("img");
+image.src = img;
+
+let del = document.createElement("button");
+del.innerText="×";
+del.classList.add("delete-btn");
+del.onclick = function(){
+deleteImage(index);
+};
+
+box.appendChild(image);
+box.appendChild(del);
+preview.appendChild(box);
 });
 }
 
+/* Delete Image */
+function deleteImage(index){
+data.images.splice(index,1);
+renderImages();
+}
+
+/* Upload Images */
 fileInput.addEventListener("change",function(e){
 let files=e.target.files;
 for(let i=0;i<files.length;i++){
@@ -148,11 +227,14 @@ reader.readAsDataURL(files[i]);
 }
 });
 
+/* Save Everything */
 function save(){
+data.heroTitle=document.getElementById("heroTitle").value;
 data.name=document.getElementById("name").value;
 data.nickname=document.getElementById("nickname").value;
 data.birthday=document.getElementById("birthday").value;
-data.heroTitle=document.getElementById("heroTitle").value;
+data.surpriseButton=document.getElementById("surpriseButton").value;
+data.cakeButton=document.getElementById("cakeButton").value;
 data.surpriseTitle=document.getElementById("surpriseTitle").value;
 data.surpriseMessage=document.getElementById("surpriseMessage").value;
 
@@ -161,6 +243,7 @@ alert("Saved Successfully 👑");
 }
 
 load();
+
 </script>
 
 </body>
