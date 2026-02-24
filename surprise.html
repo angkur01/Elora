@@ -14,9 +14,13 @@ padding:0;
 box-sizing:border-box;
 }
 
-body{
-height:100vh;
+html,body{
+height:100%;
 overflow:hidden;
+}
+
+body{
+min-height:100svh; /* mobile viewport fix */
 font-family:'Poppins',sans-serif;
 background:linear-gradient(135deg,#f8d7e3,#f3c6d9,#fce6ee);
 display:flex;
@@ -25,63 +29,63 @@ align-items:center;
 position:relative;
 }
 
-/* Soft floating glow */
+/* Soft glow */
 body::before{
 content:"";
 position:absolute;
-width:200%;
-height:200%;
+inset:0;
 background:
-radial-gradient(circle at 20% 30%, rgba(255,182,193,0.3), transparent 40%),
-radial-gradient(circle at 80% 70%, rgba(255,182,193,0.3), transparent 40%);
-animation:glowMove 15s infinite linear;
+radial-gradient(circle at 20% 30%, rgba(255,182,193,0.25), transparent 40%),
+radial-gradient(circle at 80% 70%, rgba(255,182,193,0.25), transparent 40%);
+animation:glowMove 18s infinite linear;
+z-index:0;
 }
 
 @keyframes glowMove{
 0%{transform:translate(0,0);}
-50%{transform:translate(-5%, -5%);}
+50%{transform:translate(-3%, -3%);}
 100%{transform:translate(0,0);}
 }
 
 .wrapper{
-width:100%;
-max-width:900px;
-height:85vh;
-background:rgba(255,255,255,0.85);
-backdrop-filter:blur(20px);
-border-radius:25px;
-box-shadow:0 30px 60px rgba(0,0,0,0.15);
-padding:50px;
-display:flex;
-flex-direction:column;
-justify-content:space-between;
 position:relative;
 z-index:2;
+width:92%;
+max-width:800px;
+height:85svh;
+background:rgba(255,255,255,0.9);
+backdrop-filter:blur(18px);
+border-radius:22px;
+box-shadow:0 25px 50px rgba(0,0,0,0.12);
+padding:30px 25px;
+display:flex;
+flex-direction:column;
 }
 
 h1{
 font-family:'Playfair Display',serif;
 text-align:center;
-margin-bottom:20px;
+margin-bottom:15px;
 color:#1c1c1c;
+font-size:clamp(22px,5vw,30px);
 }
 
 .letter{
 flex:1;
-overflow:hidden;
 position:relative;
+overflow:hidden;
 }
 
 .letter-content{
 position:absolute;
 width:100%;
 line-height:1.8;
-font-size:16px;
+font-size:clamp(14px,3.8vw,16px);
 color:#333;
-animation:scrollText 40s linear infinite;
+animation:scrollText 60s linear infinite;
 }
 
-/* Internal text auto-scroll */
+/* Smooth internal scroll */
 @keyframes scrollText{
 0%{transform:translateY(100%);}
 100%{transform:translateY(-100%);}
@@ -89,38 +93,47 @@ animation:scrollText 40s linear infinite;
 
 .image-container{
 display:flex;
-gap:15px;
+gap:10px;
 justify-content:center;
-margin-top:15px;
+margin-top:12px;
+flex-wrap:wrap;
 }
 
 .image-container img{
-width:120px;
-border-radius:15px;
-box-shadow:0 10px 20px rgba(0,0,0,0.2);
+width:80px;
+border-radius:12px;
+box-shadow:0 8px 15px rgba(0,0,0,0.15);
 }
 
 .back{
 text-align:center;
-margin-top:20px;
+margin-top:12px;
 }
 
 .back a{
-padding:10px 25px;
+padding:8px 20px;
 background:#e8a0bf;
 color:white;
-border-radius:30px;
+border-radius:25px;
 text-decoration:none;
-font-weight:500;
+font-size:14px;
 }
 
 .credit{
 position:absolute;
-bottom:15px;
+bottom:12px;
+left:0;
 width:100%;
 text-align:center;
-font-size:13px;
+font-size:11px;
 color:#555;
+}
+
+/* Extra small phones */
+@media (max-height:600px){
+.wrapper{
+transform:scale(0.95);
+}
 }
 </style>
 </head>
@@ -149,7 +162,6 @@ Designed & Developed by <b>Dev AngKur</b>
 
 <script>
 
-/* Load admin data */
 let defaultData = {
 surpriseTitle:"For You 💌",
 surpriseMessage:"Your long emotional letter goes here...",
@@ -161,12 +173,12 @@ let data = JSON.parse(localStorage.getItem("siteData")) || defaultData;
 document.getElementById("surpriseTitle").innerText = data.surpriseTitle;
 document.getElementById("surpriseMessage").innerText = data.surpriseMessage;
 
-/* Load Images */
+/* Load images */
 let container = document.getElementById("imageContainer");
 if(data.images){
 data.images.forEach(img=>{
-let image = document.createElement("img");
-image.src = img;
+let image=document.createElement("img");
+image.src=img;
 container.appendChild(image);
 });
 }
