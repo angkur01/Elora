@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Happy Birthday Mashkura</title>
+<title>Happy Birthday</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
@@ -18,22 +18,23 @@ body{
 height:100vh;
 overflow:hidden;
 font-family:'Poppins',sans-serif;
-background:linear-gradient(135deg,#f8d7e3,#fce6ee,#f3c6d9);
+background:linear-gradient(135deg,#f8d7e3,#f3c6d9,#fce6ee);
 display:flex;
 justify-content:center;
 align-items:center;
 position:relative;
 }
 
-/* Floating glow particles */
+/* Soft animated glow */
 body::before{
 content:"";
 position:absolute;
 width:200%;
 height:200%;
-background:radial-gradient(circle at 30% 30%,rgba(255,182,193,0.4),transparent 40%),
-radial-gradient(circle at 70% 60%,rgba(255,182,193,0.4),transparent 40%);
-animation:glowMove 10s infinite linear;
+background:
+radial-gradient(circle at 25% 30%, rgba(255,182,193,0.35), transparent 40%),
+radial-gradient(circle at 75% 70%, rgba(255,182,193,0.35), transparent 40%);
+animation:glowMove 14s infinite linear;
 }
 
 @keyframes glowMove{
@@ -47,119 +48,66 @@ text-align:center;
 z-index:2;
 max-width:800px;
 padding:20px;
+animation:fadeIn 1.8s ease;
 }
 
 h1{
 font-family:'Playfair Display',serif;
-font-size:48px;
+font-size:50px;
 color:#1c1c1c;
 line-height:1.3;
-animation:fadeIn 2s ease;
 }
 
 .age{
 margin-top:15px;
 font-size:18px;
-color:#333;
+color:#444;
+}
+
+.buttons{
+margin-top:40px;
+display:flex;
+flex-direction:column;
+gap:18px;
+align-items:center;
 }
 
 button{
-margin-top:20px;
-padding:14px 35px;
+width:260px;
+padding:14px;
 border:none;
 border-radius:40px;
-background:linear-gradient(45deg,#e8a0bf,#ffb6c1);
-color:white;
 font-weight:600;
 cursor:pointer;
-box-shadow:0 10px 30px rgba(255,105,180,0.3);
 transition:0.4s;
+font-size:15px;
 }
 
-button:hover{
-transform:translateY(-5px);
+.surprise-btn{
+background:linear-gradient(45deg,#e8a0bf,#ffb6c1);
+color:white;
+box-shadow:0 12px 30px rgba(255,105,180,0.3);
 }
 
-.secondary{
+.surprise-btn:hover{
+transform:translateY(-6px);
+}
+
+.cake-btn{
 background:#1c1c1c;
 color:white;
 }
 
-#surpriseText{
-margin-top:25px;
-font-size:22px;
-color:#222;
-opacity:0;
-transition:0.5s;
+.cake-btn:hover{
+transform:translateY(-6px);
+background:#333;
 }
 
-#cakeSection{
+.footer{
 position:absolute;
-bottom:-100%;
-left:0;
-width:100%;
-height:100%;
-background:rgba(255,255,255,0.9);
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-transition:0.7s;
-}
-
-.cake{
-width:200px;
-height:150px;
-background:linear-gradient(#ffb6c1,#ff8fab);
-border-radius:20px 20px 10px 10px;
-position:relative;
-}
-
-.cake::before{
-content:"";
-position:absolute;
-top:-20px;
-left:50%;
-transform:translateX(-50%);
-width:10px;
-height:25px;
-background:#fff;
-border-radius:5px;
-}
-
-.cake::after{
-content:"";
-position:absolute;
-top:-30px;
-left:50%;
-transform:translateX(-50%);
-width:15px;
-height:15px;
-background:orange;
-border-radius:50%;
-animation:flicker 1s infinite;
-}
-
-@keyframes flicker{
-0%,100%{opacity:1;}
-50%{opacity:0.5;}
-}
-
-.cut{
-position:absolute;
-top:0;
-left:50%;
-width:4px;
-height:0%;
-background:#fff;
-transition:0.8s;
-}
-
-.credit{
-position:absolute;
-bottom:15px;
+bottom:20px;
 font-size:14px;
-color:#444;
+color:#555;
 }
 
 @keyframes fadeIn{
@@ -172,61 +120,65 @@ to{opacity:1; transform:translateY(0);}
 <body>
 
 <div class="container">
-<h1>
-Happy Birthday <br>
-Elora Jannat <br>
-— Mashkura —
-</h1>
+<h1 id="heroTitle"></h1>
 
 <p class="age" id="ageText"></p>
 
-<button onclick="showSurprise()">Open Your Surprise ✨</button>
-<br>
-<button class="secondary" onclick="showCake()">Cut Your Cake 🎂</button>
+<div class="buttons">
+<button class="surprise-btn" onclick="goSurprise()">
+Open Your Surprise ✨
+</button>
 
-<div id="surpriseText">
-You will always be my Mashkura 🖤
-</div>
-</div>
-
-<div id="cakeSection">
-<h2>Long press the cake to cut it 🎂</h2>
-<div class="cake" id="cake">
-<div class="cut" id="cutLine"></div>
+<button class="cake-btn" onclick="goCake()">
+Cut Your Cake 🎂
+</button>
 </div>
 </div>
 
-<div class="credit">
+<div class="footer">
 Designed & Developed by <b>Dev AngKur</b>
 </div>
 
 <script>
-const birthDate = new Date("2009-03-09");
+
+/* ===== Load Admin Data ===== */
+
+let defaultData = {
+name:"Elora Jannat",
+nickname:"Mashkura",
+birthday:"2009-03-09",
+heroTitle:"Happy Birthday",
+surpriseButton:"Open Your Surprise ✨",
+cakeButton:"Cut Your Cake 🎂"
+};
+
+let data = JSON.parse(localStorage.getItem("siteData")) || defaultData;
+
+/* ===== Apply Dynamic Data ===== */
+
+document.getElementById("heroTitle").innerHTML =
+data.heroTitle + "<br>" + data.name + "<br>— " + data.nickname + " —";
+
+const birthDate = new Date(data.birthday);
 const today = new Date();
 let age = today.getFullYear() - birthDate.getFullYear();
+
 document.getElementById("ageText").innerText =
 "You are " + age + " years old today ✨";
 
-function showSurprise(){
-document.getElementById("surpriseText").style.opacity="1";
+/* Update Button Text */
+document.querySelector(".surprise-btn").innerText = data.surpriseButton;
+document.querySelector(".cake-btn").innerText = data.cakeButton;
+
+/* Navigation */
+function goSurprise(){
+window.location.href = "surprise.html";
 }
 
-function showCake(){
-document.getElementById("cakeSection").style.bottom="0";
+function goCake(){
+window.location.href = "cake.html";
 }
 
-let cake = document.getElementById("cake");
-let cutLine = document.getElementById("cutLine");
-
-cake.addEventListener("mousedown", startCut);
-cake.addEventListener("touchstart", startCut);
-
-function startCut(){
-cutLine.style.height="100%";
-setTimeout(()=>{
-alert("Cake Cut Successfully 🎉💖");
-},800);
-}
 </script>
 
 </body>

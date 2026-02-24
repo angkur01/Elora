@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cut The Cake 🎂</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+height:100vh;
+overflow:hidden;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#f8d7e3,#f3c6d9,#fce6ee);
+font-family:sans-serif;
+position:relative;
+}
+
+h2{
+margin-bottom:30px;
+color:#1c1c1c;
+}
+
+/* Cake container */
+.cake-wrapper{
+position:relative;
+width:220px;
+height:180px;
+}
+
+/* Cake bottom */
+.cake-bottom{
+width:220px;
+height:90px;
+background:linear-gradient(#ff8fab,#e75480);
+border-radius:20px;
+position:absolute;
+bottom:0;
+}
+
+/* Cake top */
+.cake-top{
+width:180px;
+height:70px;
+background:linear-gradient(#ffc2d1,#ff99c8);
+border-radius:20px;
+position:absolute;
+bottom:80px;
+left:20px;
+}
+
+/* Candle */
+.candle{
+width:12px;
+height:35px;
+background:white;
+position:absolute;
+top:-25px;
+left:104px;
+border-radius:5px;
+}
+
+.flame{
+width:14px;
+height:14px;
+background:orange;
+border-radius:50%;
+position:absolute;
+top:-40px;
+left:103px;
+animation:flicker 1s infinite;
+}
+
+@keyframes flicker{
+0%,100%{opacity:1;}
+50%{opacity:0.6;}
+}
+
+/* Cutting line */
+.cut-line{
+position:absolute;
+top:0;
+left:50%;
+width:4px;
+height:0%;
+background:white;
+transition:1s;
+}
+
+/* Cake split animation */
+.split-left{
+transform:translateX(-60px) rotate(-8deg);
+transition:1s;
+}
+
+.split-right{
+transform:translateX(60px) rotate(8deg);
+transition:1s;
+}
+
+/* Confetti */
+.confetti{
+position:absolute;
+width:8px;
+height:8px;
+background:red;
+animation:fall 3s linear infinite;
+}
+
+@keyframes fall{
+0%{transform:translateY(-100px);}
+100%{transform:translateY(100vh);}
+}
+
+.message{
+position:absolute;
+bottom:100px;
+font-size:22px;
+color:#1c1c1c;
+opacity:0;
+transition:1s;
+}
+
+.back{
+position:absolute;
+bottom:40px;
+padding:10px 25px;
+background:black;
+color:white;
+border-radius:25px;
+text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Long press the cake to cut it 🎂</h2>
+
+<div class="cake-wrapper" id="cakeWrapper">
+<div class="cake-top" id="cakeTop"></div>
+<div class="cake-bottom" id="cakeBottom"></div>
+<div class="candle"></div>
+<div class="flame"></div>
+<div class="cut-line" id="cutLine"></div>
+</div>
+
+<div class="message" id="cutMessage">
+Cake Cut Successfully 🎉💖
+</div>
+
+<a href="index.html" class="back">Go Back</a>
+
+<script>
+
+let cakeWrapper = document.getElementById("cakeWrapper");
+let cutLine = document.getElementById("cutLine");
+let cakeTop = document.getElementById("cakeTop");
+let cakeBottom = document.getElementById("cakeBottom");
+let message = document.getElementById("cutMessage");
+
+let pressTimer;
+
+function startPress(){
+pressTimer = setTimeout(cutCake, 800); // hold 0.8s
+}
+
+function cancelPress(){
+clearTimeout(pressTimer);
+}
+
+cakeWrapper.addEventListener("mousedown", startPress);
+cakeWrapper.addEventListener("mouseup", cancelPress);
+cakeWrapper.addEventListener("mouseleave", cancelPress);
+
+cakeWrapper.addEventListener("touchstart", startPress);
+cakeWrapper.addEventListener("touchend", cancelPress);
+
+function cutCake(){
+
+cutLine.style.height = "100%";
+
+/* Split animation */
+cakeTop.classList.add("split-left");
+cakeBottom.classList.add("split-right");
+
+/* Show message */
+setTimeout(()=>{
+message.style.opacity="1";
+createConfetti();
+},1000);
+}
+
+/* Confetti generator */
+function createConfetti(){
+for(let i=0;i<40;i++){
+let conf = document.createElement("div");
+conf.classList.add("confetti");
+conf.style.left = Math.random()*100 + "vw";
+conf.style.background = `hsl(${Math.random()*360},70%,60%)`;
+conf.style.animationDuration = (Math.random()*3+2)+"s";
+document.body.appendChild(conf);
+}
+}
+
+</script>
+
+</body>
+</html>

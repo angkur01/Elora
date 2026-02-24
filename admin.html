@@ -3,18 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Princess Admin Panel</title>
+<title>Admin Panel</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
-
 body{
+margin:0;
 font-family:'Poppins',sans-serif;
 background:linear-gradient(135deg,#000,#2b2b2b);
 color:white;
@@ -24,7 +19,6 @@ justify-content:center;
 align-items:center;
 padding:30px;
 }
-
 .panel{
 width:100%;
 max-width:900px;
@@ -34,18 +28,8 @@ border-radius:20px;
 padding:40px;
 box-shadow:0 20px 50px rgba(0,0,0,0.5);
 }
-
-h1{
-text-align:center;
-margin-bottom:30px;
-}
-
-label{
-display:block;
-margin-top:20px;
-font-weight:600;
-}
-
+h1{text-align:center;margin-bottom:30px;}
+label{display:block;margin-top:20px;font-weight:600;}
 input, textarea{
 width:100%;
 margin-top:8px;
@@ -55,39 +39,25 @@ border:none;
 background:#1a1a1a;
 color:white;
 }
-
-textarea{
-min-height:100px;
-resize:none;
-}
-
-.upload-area{
+textarea{min-height:90px;}
+.upload{
 margin-top:20px;
-padding:30px;
+padding:25px;
 border:2px dashed #ff9ecb;
 border-radius:15px;
 text-align:center;
 cursor:pointer;
-transition:0.3s;
 }
-
-.upload-area:hover{
-background:rgba(255,182,193,0.1);
-}
-
 .preview{
-margin-top:20px;
+margin-top:15px;
 display:flex;
-gap:15px;
 flex-wrap:wrap;
+gap:10px;
 }
-
 .preview img{
-width:100px;
-border-radius:12px;
-box-shadow:0 10px 20px rgba(0,0,0,0.5);
+width:90px;
+border-radius:10px;
 }
-
 button{
 margin-top:25px;
 padding:12px 30px;
@@ -97,20 +67,13 @@ background:linear-gradient(45deg,#ff4fa3,#ff9ecb);
 color:white;
 font-weight:600;
 cursor:pointer;
-transition:0.3s;
-}
-
-button:hover{
-transform:translateY(-3px);
 }
 </style>
 </head>
-
 <body>
 
 <div class="panel">
-
-<h1>Birthday Website Admin 👑</h1>
+<h1>Birthday Admin 👑</h1>
 
 <label>Name</label>
 <input id="name">
@@ -121,62 +84,63 @@ transform:translateY(-3px);
 <label>Birthday</label>
 <input type="date" id="birthday">
 
-<label>Main Message</label>
-<textarea id="message"></textarea>
+<label>Hero Title</label>
+<input id="heroTitle">
+
+<label>Surprise Title</label>
+<input id="surpriseTitle">
 
 <label>Surprise Message</label>
-<textarea id="surprise"></textarea>
+<textarea id="surpriseMessage"></textarea>
 
-<label>Upload Photos</label>
-<div class="upload-area" onclick="document.getElementById('fileInput').click()">
-Click or Drop Images Here
+<div class="upload" onclick="fileInput.click()">
+Upload Photos
 </div>
-
 <input type="file" id="fileInput" multiple accept="image/*" style="display:none">
 
 <div class="preview" id="preview"></div>
 
-<button onclick="saveData()">Save Changes ✅</button>
+<button onclick="save()">Save Changes</button>
 
 </div>
 
 <script>
-
 let defaultData = {
 name:"Elora Jannat",
 nickname:"Mashkura",
 birthday:"2009-03-09",
-message:"You are my safe place.",
-surprise:"You will always be my Mashkura 🖤",
+heroTitle:"Happy Birthday",
+surpriseTitle:"For You 💌",
+surpriseMessage:"You are my safe place.",
 images:[]
 };
 
 let data = JSON.parse(localStorage.getItem("siteData")) || defaultData;
 
-function loadData(){
-document.getElementById("name").value = data.name;
-document.getElementById("nickname").value = data.nickname;
-document.getElementById("birthday").value = data.birthday;
-document.getElementById("message").value = data.message;
-document.getElementById("surprise").value = data.surprise;
+function load(){
+for(let key in data){
+if(document.getElementById(key)){
+document.getElementById(key).value = data[key];
+}
+}
 renderImages();
 }
 
 function renderImages(){
 let preview = document.getElementById("preview");
-preview.innerHTML = "";
+preview.innerHTML="";
 data.images.forEach(img=>{
-let image = document.createElement("img");
-image.src = img;
+let image=document.createElement("img");
+image.src=img;
 preview.appendChild(image);
 });
 }
 
-document.getElementById("fileInput").addEventListener("change", function(e){
-let files = e.target.files;
+fileInput.addEventListener("change",function(e){
+let files=e.target.files;
 for(let i=0;i<files.length;i++){
-let reader = new FileReader();
-reader.onload = function(event){
+let reader=new FileReader();
+reader.onload=function(event){
 data.images.push(event.target.result);
 renderImages();
 };
@@ -184,19 +148,19 @@ reader.readAsDataURL(files[i]);
 }
 });
 
-function saveData(){
-data.name = document.getElementById("name").value;
-data.nickname = document.getElementById("nickname").value;
-data.birthday = document.getElementById("birthday").value;
-data.message = document.getElementById("message").value;
-data.surprise = document.getElementById("surprise").value;
+function save(){
+data.name=document.getElementById("name").value;
+data.nickname=document.getElementById("nickname").value;
+data.birthday=document.getElementById("birthday").value;
+data.heroTitle=document.getElementById("heroTitle").value;
+data.surpriseTitle=document.getElementById("surpriseTitle").value;
+data.surpriseMessage=document.getElementById("surpriseMessage").value;
 
 localStorage.setItem("siteData",JSON.stringify(data));
 alert("Saved Successfully 👑");
 }
 
-loadData();
-
+load();
 </script>
 
 </body>
