@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Your Surprise 💌</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -14,37 +14,42 @@ html,body{height:100%;overflow:hidden;}
 body{
 min-height:100svh;
 font-family:'Poppins',sans-serif;
-background:
-linear-gradient(135deg,#f8d7e3,#f3c6d9,#fce6ee),
-url("https://www.transparenttextures.com/patterns/paper-fibers.png");
+background:linear-gradient(135deg,#f8d7e3,#f3c6d9,#fce6ee);
 display:flex;
 justify-content:center;
 align-items:center;
 position:relative;
+animation:fadeIn 1.2s ease;
 }
 
-/* Floating hearts */
+@keyframes fadeIn{
+from{opacity:0;transform:scale(1.05);}
+to{opacity:1;transform:scale(1);}
+}
+
+/* Floating Hearts */
 .heart{
 position:absolute;
-font-size:14px;
 color:rgba(255,105,180,0.25);
 animation:floatUp linear infinite;
 pointer-events:none;
 }
 
 @keyframes floatUp{
-from{transform:translateY(100vh) scale(0.8);}
-to{transform:translateY(-10vh) scale(1.2);}
+from{transform:translateY(100vh);}
+to{transform:translateY(-10vh);}
 }
 
+/* Card */
 .wrapper{
 width:92%;
-max-width:720px;
+max-width:750px;
 height:85svh;
-background:rgba(255,255,255,0.96);
+background:rgba(255,255,255,0.85);
+backdrop-filter:blur(20px);
 border-radius:25px;
 box-shadow:0 30px 70px rgba(0,0,0,0.15);
-padding:30px 25px;
+padding:30px;
 display:flex;
 flex-direction:column;
 position:relative;
@@ -54,24 +59,15 @@ h1{
 font-family:'Playfair Display',serif;
 text-align:center;
 margin-bottom:20px;
-color:#1c1c1c;
-opacity:0;
-animation:fadeTitle 1.2s ease forwards;
+font-size:26px;
 }
 
-@keyframes fadeTitle{to{opacity:1;}}
-
+/* Letter */
 .letter{
 flex:1;
 overflow-y:auto;
 padding-right:6px;
-scrollbar-width:thin;
-}
-
-.letter::-webkit-scrollbar{width:6px;}
-.letter::-webkit-scrollbar-thumb{
-background:#e8a0bf;
-border-radius:10px;
+margin-bottom:15px;
 }
 
 #typedText{
@@ -94,8 +90,29 @@ animation:blink 1s infinite;
 25%,75%{opacity:0;}
 }
 
+/* Gallery */
+.gallery{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(90px,1fr));
+gap:10px;
+margin-top:10px;
+}
+
+.gallery img{
+width:100%;
+border-radius:12px;
+object-fit:cover;
+transition:0.3s;
+cursor:pointer;
+}
+
+.gallery img:hover{
+transform:scale(1.05);
+}
+
+/* Back Button */
 .back{
-margin-top:15px;
+margin-top:10px;
 text-align:center;
 }
 
@@ -108,6 +125,7 @@ text-decoration:none;
 font-size:14px;
 }
 
+/* Footer */
 .footer{
 position:absolute;
 bottom:12px;
@@ -129,6 +147,8 @@ color:#555;
 <span id="typedText"></span><span class="cursor"></span>
 </div>
 
+<div class="gallery" id="gallery"></div>
+
 <div class="back">
 <a href="index.html">Go Back</a>
 </div>
@@ -139,29 +159,14 @@ color:#555;
 Designed & Developed by <b>Dev AngKur</b>
 </div>
 
-<audio id="typingSound"
-src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_8f43a0c09b.mp3?filename=keyboard-typing-110399.mp3"
-preload="auto"></audio>
+<audio id="bgMusic"
+src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_1f2c1cdb2b.mp3?filename=soft-piano-ambient-110397.mp3"
+loop preload="auto"></audio>
 
-<script type="module">
+<script>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAqjJdmgZoxn4b_SYcq4jCupkgOw2B6WAc",
-  authDomain: "elora-birthday.firebaseapp.com",
-  projectId: "elora-birthday",
-  storageBucket: "elora-birthday.firebasestorage.app",
-  messagingSenderId: "34536952055",
-  appId: "1:34536952055:web:388846fa6e28026a2a43f2"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-/* Floating hearts */
-for(let i=0;i<18;i++){
+/* Floating Hearts */
+for(let i=0;i<20;i++){
 let heart=document.createElement("div");
 heart.className="heart";
 heart.innerHTML="❤";
@@ -171,50 +176,52 @@ heart.style.fontSize=(Math.random()*8+12)+"px";
 document.body.appendChild(heart);
 }
 
-async function loadSurprise(){
-
-try{
-const snap = await getDoc(doc(db, "birthday", "main"));
-if(!snap.exists()) throw new Error("No data found");
-
-const data = snap.data();
+/* Load data.json */
+fetch("data.json")
+.then(res=>res.json())
+.then(data=>{
 
 document.getElementById("surpriseTitle").innerText = data.surpriseTitle;
 
 let text = data.surpriseMessage;
 let typedText = document.getElementById("typedText");
 let letterBox = document.getElementById("letterBox");
-let typingSound = document.getElementById("typingSound");
+let bgMusic = document.getElementById("bgMusic");
 
 let i = 0;
 let speed = 18;
 
 function typeWriter(){
 if(i < text.length){
-
 typedText.innerHTML += text.charAt(i);
-
-if(i % 3 === 0){
-typingSound.currentTime = 0;
-typingSound.play().catch(()=>{});
-}
-
 i++;
 letterBox.scrollTop = letterBox.scrollHeight;
 setTimeout(typeWriter, speed);
 }
 }
 
-setTimeout(typeWriter, 1200);
+setTimeout(typeWriter, 800);
 
-}catch(error){
-console.error(error);
+/* Music after first tap */
+document.body.addEventListener("click",()=>{
+bgMusic.volume = data.musicVolume ?? 0.4;
+bgMusic.play().catch(()=>{});
+},{once:true});
+
+/* Load Gallery */
+if(data.images && data.images.length){
+const gallery = document.getElementById("gallery");
+data.images.forEach(src=>{
+const img=document.createElement("img");
+img.src=src;
+gallery.appendChild(img);
+});
+}
+
+})
+.catch(()=>{
 document.getElementById("surpriseTitle").innerText="For You 💌";
-}
-
-}
-
-loadSurprise();
+});
 
 </script>
 

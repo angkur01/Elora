@@ -3,17 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Happy Birthday</title>
+<title>Happy Birthday 💖</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-
-html,body{
-height:100%;
-overflow:hidden;
-}
+html,body{height:100%;overflow:hidden;}
 
 body{
 min-height:100svh;
@@ -23,35 +19,57 @@ display:flex;
 justify-content:center;
 align-items:center;
 position:relative;
+animation:fadeIn 1.2s ease;
 }
 
-/* Glow */
+/* Background glow */
 body::before{
 content:"";
 position:absolute;
 inset:0;
 background:
-radial-gradient(circle at 25% 30%, rgba(255,182,193,0.35), transparent 40%),
-radial-gradient(circle at 75% 70%, rgba(255,182,193,0.35), transparent 40%);
-animation:glowMove 14s infinite linear;
+radial-gradient(circle at 20% 30%, rgba(255,182,193,0.4), transparent 40%),
+radial-gradient(circle at 80% 70%, rgba(255,182,193,0.4), transparent 40%);
+animation:glowMove 18s infinite linear;
 z-index:0;
 }
 
 @keyframes glowMove{
 0%{transform:translate(0,0);}
-50%{transform:translate(-3%, -3%);}
+50%{transform:translate(-4%,-4%);}
 100%{transform:translate(0,0);}
 }
 
+@keyframes fadeIn{
+from{opacity:0;transform:scale(1.05);}
+to{opacity:1;transform:scale(1);}
+}
+
+/* Floating hearts */
+.heart{
+position:absolute;
+color:rgba(255,105,180,0.25);
+animation:floatUp linear infinite;
+pointer-events:none;
+}
+
+@keyframes floatUp{
+from{transform:translateY(100vh);}
+to{transform:translateY(-10vh);}
+}
+
+/* Card */
 .container{
 position:relative;
 z-index:2;
 text-align:center;
 width:92%;
-max-width:600px;
-padding:20px;
-opacity:0;
-animation:fadeIn 1.2s ease forwards;
+max-width:650px;
+padding:35px;
+background:rgba(255,255,255,0.7);
+backdrop-filter:blur(20px);
+border-radius:25px;
+box-shadow:0 30px 80px rgba(0,0,0,0.15);
 }
 
 h1{
@@ -59,48 +77,54 @@ font-family:'Playfair Display',serif;
 font-size:clamp(28px,6vw,48px);
 color:#1c1c1c;
 line-height:1.35;
+margin-bottom:10px;
+}
+
+.name{
+color:#e75480;
+font-weight:700;
 }
 
 .age{
-margin-top:16px;
-font-size:clamp(14px,4vw,18px);
-color:#444;
+margin-top:10px;
+font-size:16px;
+color:#555;
+opacity:0;
+animation:fadeAge 1s ease forwards 1s;
+}
+
+@keyframes fadeAge{
+to{opacity:1;}
 }
 
 .buttons{
 margin-top:35px;
 display:flex;
 flex-direction:column;
-gap:16px;
+gap:18px;
 align-items:center;
 }
 
 button{
 width:100%;
 max-width:280px;
-padding:14px;
+padding:15px;
 border:none;
 border-radius:40px;
 font-weight:600;
 cursor:pointer;
-transition:0.3s ease;
-font-size:14px;
-opacity:0.8;
-}
-
-button:disabled{
-opacity:0.4;
-cursor:not-allowed;
+transition:0.3s;
+font-size:15px;
 }
 
 .surprise-btn{
 background:linear-gradient(45deg,#e8a0bf,#ffb6c1);
 color:white;
-box-shadow:0 8px 25px rgba(255,105,180,0.3);
+box-shadow:0 10px 30px rgba(255,105,180,0.4);
 }
 
-.surprise-btn:active{
-transform:scale(0.96);
+.surprise-btn:hover{
+transform:translateY(-6px) scale(1.03);
 }
 
 .cake-btn{
@@ -108,8 +132,8 @@ background:#1c1c1c;
 color:white;
 }
 
-.cake-btn:active{
-transform:scale(0.96);
+.cake-btn:hover{
+transform:translateY(-6px) scale(1.03);
 background:#333;
 }
 
@@ -121,15 +145,6 @@ width:100%;
 text-align:center;
 font-size:12px;
 color:#555;
-padding:0 10px;
-}
-
-@keyframes fadeIn{
-to{opacity:1;}
-}
-
-@media (max-height:600px){
-.container{transform:scale(0.95);}
 }
 </style>
 </head>
@@ -141,8 +156,8 @@ to{opacity:1;}
 <p class="age" id="ageText"></p>
 
 <div class="buttons">
-<button class="surprise-btn" id="surpriseBtn" disabled>Loading...</button>
-<button class="cake-btn" id="cakeBtn" disabled>Loading...</button>
+<button class="surprise-btn" id="surpriseBtn">✨ Open Your Surprise</button>
+<button class="cake-btn" id="cakeBtn">🎂 Cut Your Cake</button>
 </div>
 </div>
 
@@ -150,63 +165,49 @@ to{opacity:1;}
 Designed & Developed by <b>Dev AngKur</b>
 </div>
 
-<!-- FIREBASE SCRIPT -->
-<script type="module">
+<script>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAqjJdmgZoxn4b_SYcq4jCupkgOw2B6WAc",
-  authDomain: "elora-birthday.firebaseapp.com",
-  projectId: "elora-birthday",
-  storageBucket: "elora-birthday.firebasestorage.app",
-  messagingSenderId: "34536952055",
-  appId: "1:34536952055:web:388846fa6e28026a2a43f2"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const surpriseBtn = document.getElementById("surpriseBtn");
-const cakeBtn = document.getElementById("cakeBtn");
-
-async function loadData() {
-  try {
-    const snap = await getDoc(doc(db, "birthday", "main"));
-
-    if (!snap.exists()) {
-      throw new Error("No data found");
-    }
-
-    const data = snap.data();
-
-    document.getElementById("heroTitle").innerHTML =
-      data.heroTitle + "<br>" + data.name + "<br>— " + data.nickname + " —";
-
-    const birthDate = new Date(data.birthday);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-
-    document.getElementById("ageText").innerText =
-      "You are " + age + " years old today ✨";
-
-    surpriseBtn.innerText = data.surpriseButton;
-    cakeBtn.innerText = data.cakeButton;
-
-    surpriseBtn.disabled = false;
-    cakeBtn.disabled = false;
-
-  } catch (error) {
-    console.error(error);
-    document.getElementById("heroTitle").innerText = "Happy Birthday 💖";
-  }
+/* Floating hearts */
+for(let i=0;i<20;i++){
+let heart=document.createElement("div");
+heart.className="heart";
+heart.innerHTML="❤";
+heart.style.left=Math.random()*100+"vw";
+heart.style.animationDuration=(Math.random()*12+10)+"s";
+heart.style.fontSize=(Math.random()*8+12)+"px";
+document.body.appendChild(heart);
 }
 
-loadData();
+/* Load data.json */
+fetch("data.json")
+.then(res=>res.json())
+.then(data=>{
 
-surpriseBtn.onclick = () => location.href = "surprise.html";
-cakeBtn.onclick = () => location.href = "cake.html";
+document.getElementById("heroTitle").innerHTML =
+data.heroTitle + "<br><span class='name'>" +
+data.name + "</span><br>— " +
+data.nickname + " —";
+
+const birthDate = new Date(data.birthday);
+const today = new Date();
+let age = today.getFullYear() - birthDate.getFullYear();
+
+document.getElementById("ageText").innerText =
+"You are " + age + " years old today ✨";
+
+document.getElementById("surpriseBtn").innerText =
+data.surpriseButton;
+
+document.getElementById("cakeBtn").innerText =
+data.cakeButton;
+
+})
+.catch(()=>{
+document.getElementById("heroTitle").innerText="Happy Birthday 💖";
+});
+
+document.getElementById("surpriseBtn").onclick = ()=>location.href="surprise.html";
+document.getElementById("cakeBtn").onclick = ()=>location.href="cake.html";
 
 </script>
 
