@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+body{
+margin:0;
+font-family:'Poppins',sans-serif;
+background:linear-gradient(135deg,#000,#1a1a1a);
+color:white;
+padding:30px;
+}
+
+h1{
+text-align:center;
+margin-bottom:30px;
+}
+
+.container{
+max-width:800px;
+margin:auto;
+background:rgba(255,255,255,0.05);
+padding:30px;
+border-radius:20px;
+backdrop-filter:blur(20px);
+box-shadow:0 15px 40px rgba(0,0,0,0.5);
+}
+
+label{
+display:block;
+margin-top:20px;
+font-weight:600;
+}
+
+input, textarea{
+width:100%;
+margin-top:8px;
+padding:12px;
+border-radius:10px;
+border:none;
+outline:none;
+background:#222;
+color:white;
+}
+
+textarea{
+min-height:100px;
+resize:vertical;
+}
+
+button{
+margin-top:25px;
+padding:12px 25px;
+border:none;
+border-radius:30px;
+background:linear-gradient(45deg,#ff4fa3,#ff9ecb);
+color:white;
+font-weight:600;
+cursor:pointer;
+transition:0.3s;
+}
+
+button:hover{
+transform:translateY(-3px);
+}
+
+.image-list{
+margin-top:10px;
+font-size:14px;
+color:#ccc;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Birthday Site Admin Panel 🔐</h1>
+
+<div class="container">
+
+<label>Name</label>
+<input id="name">
+
+<label>Nickname</label>
+<input id="nickname">
+
+<label>Birthday</label>
+<input id="birthday" type="date">
+
+<label>Hero Text</label>
+<input id="heroText">
+
+<label>Main Message</label>
+<textarea id="message"></textarea>
+
+<label>Button Text</label>
+<input id="buttonText">
+
+<label>Surprise Text</label>
+<textarea id="surprise"></textarea>
+
+<label>Add Image URL</label>
+<input id="imageInput">
+<button onclick="addImage()">Add Image</button>
+
+<div class="image-list" id="imageList"></div>
+
+<button onclick="save()">Save All Changes ✅</button>
+
+</div>
+
+<script>
+
+let defaultData = {
+name:"Elora Jannat",
+nickname:"Mashkura",
+birthday:"2009-03-09",
+heroText:"Happy Birthday",
+message:"You are my safe place.",
+buttonText:"Open Your Surprise 💖",
+surprise:"You will always be my Mashkura 🖤",
+images:[]
+};
+
+let data = JSON.parse(localStorage.getItem("siteData")) || defaultData;
+
+function load(){
+document.getElementById("name").value = data.name;
+document.getElementById("nickname").value = data.nickname;
+document.getElementById("birthday").value = data.birthday;
+document.getElementById("heroText").value = data.heroText;
+document.getElementById("message").value = data.message;
+document.getElementById("buttonText").value = data.buttonText;
+document.getElementById("surprise").value = data.surprise;
+renderImages();
+}
+
+function addImage(){
+let url = document.getElementById("imageInput").value;
+if(url){
+data.images.push(url);
+document.getElementById("imageInput").value="";
+renderImages();
+}
+}
+
+function renderImages(){
+let list = document.getElementById("imageList");
+list.innerHTML = "";
+data.images.forEach((img,i)=>{
+list.innerHTML += (i+1)+". "+img+"<br>";
+});
+}
+
+function save(){
+data.name = document.getElementById("name").value;
+data.nickname = document.getElementById("nickname").value;
+data.birthday = document.getElementById("birthday").value;
+data.heroText = document.getElementById("heroText").value;
+data.message = document.getElementById("message").value;
+data.buttonText = document.getElementById("buttonText").value;
+data.surprise = document.getElementById("surprise").value;
+
+localStorage.setItem("siteData",JSON.stringify(data));
+
+alert("Saved Successfully 🎉");
+}
+
+load();
+
+</script>
+
+</body>
+</html>
