@@ -25,25 +25,25 @@ padding:30px;
 width:100%;
 max-width:900px;
 background:rgba(255,255,255,0.05);
-backdrop-filter:blur(25px);
+backdrop-filter:blur(20px);
 border-radius:20px;
-padding:40px;
+padding:35px;
 box-shadow:0 20px 60px rgba(0,0,0,0.6);
 }
 
-h1{text-align:center;margin-bottom:30px;}
+h1{text-align:center;margin-bottom:25px;}
 
 label{
 display:block;
-margin-top:18px;
+margin-top:15px;
 font-weight:600;
 }
 
 input, textarea{
 width:100%;
-margin-top:8px;
-padding:12px;
-border-radius:12px;
+margin-top:6px;
+padding:10px;
+border-radius:10px;
 border:none;
 background:#1a1a1a;
 color:white;
@@ -51,64 +51,34 @@ font-size:14px;
 }
 
 textarea{
-min-height:120px;
+min-height:100px;
 resize:none;
 }
 
-.upload{
+button{
 margin-top:20px;
-padding:25px;
-border:2px dashed #ff9ecb;
-border-radius:15px;
-text-align:center;
-cursor:pointer;
-transition:0.3s;
-}
-
-.upload:hover{
-background:rgba(255,182,193,0.1);
-}
-
-.preview{
-margin-top:15px;
-display:flex;
-flex-wrap:wrap;
-gap:15px;
-}
-
-.image-box{
-position:relative;
-}
-
-.preview img{
-width:100px;
-border-radius:12px;
-box-shadow:0 10px 20px rgba(0,0,0,0.5);
-}
-
-.delete-btn{
-position:absolute;
-top:-8px;
-right:-8px;
-background:red;
-color:white;
-border:none;
-border-radius:50%;
-width:22px;
-height:22px;
-cursor:pointer;
-font-size:12px;
-}
-
-button.save{
-margin-top:25px;
-padding:12px 30px;
+padding:12px 25px;
 border:none;
 border-radius:30px;
 background:linear-gradient(45deg,#ff4fa3,#ff9ecb);
 color:white;
 font-weight:600;
 cursor:pointer;
+}
+
+pre{
+margin-top:20px;
+background:#000;
+padding:15px;
+border-radius:10px;
+overflow:auto;
+max-height:250px;
+font-size:12px;
+}
+
+.copy-btn{
+background:#1c1c1c;
+margin-left:10px;
 }
 </style>
 </head>
@@ -119,7 +89,6 @@ cursor:pointer;
 
 <h1>Birthday Admin 👑</h1>
 
-<!-- INDEX CONTROLS -->
 <label>Hero Title</label>
 <input id="heroTitle">
 
@@ -138,111 +107,66 @@ cursor:pointer;
 <label>Cake Button Text</label>
 <input id="cakeButton">
 
-<!-- SURPRISE CONTROLS -->
 <label>Surprise Title</label>
 <input id="surpriseTitle">
 
-<label>Surprise Message (Long Letter)</label>
+<label>Surprise Message</label>
 <textarea id="surpriseMessage"></textarea>
 
-<!-- IMAGE UPLOAD -->
-<div class="upload" onclick="fileInput.click()">
-Upload Photos for Surprise Page
-</div>
-<input type="file" id="fileInput" multiple accept="image/*" style="display:none">
+<label>Cake Name</label>
+<input id="cakeName">
 
-<div class="preview" id="preview"></div>
+<button onclick="generate()">Generate JSON</button>
+<button class="copy-btn" onclick="copyJSON()">Copy JSON</button>
 
-<button class="save" onclick="save()">Save Changes</button>
+<pre id="output"></pre>
 
 </div>
 
 <script>
 
-/* Default Data */
-let defaultData = {
-heroTitle:"Happy Birthday",
-name:"Elora Jannat",
-nickname:"Mashkura",
-birthday:"2009-03-09",
-surpriseButton:"Open Your Surprise ✨",
-cakeButton:"Cut Your Cake 🎂",
-surpriseTitle:"For You 💌",
-surpriseMessage:"Write your emotional letter here...",
-images:[]
-};
+let currentData = {};
 
-let data = JSON.parse(localStorage.getItem("siteData")) || defaultData;
-
-/* Load Existing Data */
-function load(){
-for(let key in data){
-if(document.getElementById(key)){
-document.getElementById(key).value = data[key];
-}
-}
-renderImages();
-}
-
-function renderImages(){
-let preview = document.getElementById("preview");
-preview.innerHTML="";
-
-data.images.forEach((img,index)=>{
-let box = document.createElement("div");
-box.classList.add("image-box");
-
-let image = document.createElement("img");
-image.src = img;
-
-let del = document.createElement("button");
-del.innerText="×";
-del.classList.add("delete-btn");
-del.onclick = function(){
-deleteImage(index);
-};
-
-box.appendChild(image);
-box.appendChild(del);
-preview.appendChild(box);
-});
-}
-
-/* Delete Image */
-function deleteImage(index){
-data.images.splice(index,1);
-renderImages();
-}
-
-/* Upload Images */
-fileInput.addEventListener("change",function(e){
-let files=e.target.files;
-for(let i=0;i<files.length;i++){
-let reader=new FileReader();
-reader.onload=function(event){
-data.images.push(event.target.result);
-renderImages();
-};
-reader.readAsDataURL(files[i]);
-}
-});
-
-/* Save Everything */
-function save(){
-data.heroTitle=document.getElementById("heroTitle").value;
-data.name=document.getElementById("name").value;
-data.nickname=document.getElementById("nickname").value;
-data.birthday=document.getElementById("birthday").value;
-data.surpriseButton=document.getElementById("surpriseButton").value;
-data.cakeButton=document.getElementById("cakeButton").value;
-data.surpriseTitle=document.getElementById("surpriseTitle").value;
-data.surpriseMessage=document.getElementById("surpriseMessage").value;
-
-localStorage.setItem("siteData",JSON.stringify(data));
-alert("Saved Successfully 👑");
-}
-
+fetch("data.json")
+.then(res=>res.json())
+.then(data=>{
+currentData = data;
 load();
+})
+.catch(()=>{
+console.log("No data.json found");
+});
+
+function load(){
+for(let key in currentData){
+if(document.getElementById(key)){
+document.getElementById(key).value = currentData[key];
+}
+}
+}
+
+function generate(){
+let newData = {
+heroTitle: heroTitle.value,
+name: name.value,
+nickname: nickname.value,
+birthday: birthday.value,
+surpriseButton: surpriseButton.value,
+cakeButton: cakeButton.value,
+surpriseTitle: surpriseTitle.value,
+surpriseMessage: surpriseMessage.value,
+cakeName: cakeName.value
+};
+
+document.getElementById("output").textContent =
+JSON.stringify(newData,null,2);
+}
+
+function copyJSON(){
+let text = document.getElementById("output").textContent;
+navigator.clipboard.writeText(text);
+alert("JSON Copied! Paste into data.json 👑");
+}
 
 </script>
 

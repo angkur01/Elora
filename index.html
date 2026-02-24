@@ -20,13 +20,13 @@ overflow:hidden;
 }
 
 body{
+min-height:100svh;
 font-family:'Poppins',sans-serif;
 background:linear-gradient(135deg,#f8d7e3,#f3c6d9,#fce6ee);
 display:flex;
 justify-content:center;
 align-items:center;
 position:relative;
-min-height:100svh; /* Fix mobile 100vh issue */
 }
 
 /* Soft animated glow */
@@ -54,7 +54,8 @@ text-align:center;
 width:92%;
 max-width:600px;
 padding:20px;
-animation:fadeIn 1.3s ease;
+opacity:0;
+animation:fadeIn 1.2s ease forwards;
 }
 
 h1{
@@ -88,6 +89,12 @@ font-weight:600;
 cursor:pointer;
 transition:0.3s ease;
 font-size:14px;
+opacity:0.8;
+}
+
+button:disabled{
+opacity:0.4;
+cursor:not-allowed;
 }
 
 .surprise-btn{
@@ -122,8 +129,9 @@ padding:0 10px;
 }
 
 @keyframes fadeIn{
-from{opacity:0; transform:translateY(15px);}
-to{opacity:1; transform:translateY(0);}
+to{
+opacity:1;
+}
 }
 
 /* Extra small screens */
@@ -138,13 +146,13 @@ transform:scale(0.95);
 <body>
 
 <div class="container">
-<h1 id="heroTitle"></h1>
+<h1 id="heroTitle">Loading...</h1>
 
 <p class="age" id="ageText"></p>
 
 <div class="buttons">
-<button class="surprise-btn" id="surpriseBtn"></button>
-<button class="cake-btn" id="cakeBtn"></button>
+<button class="surprise-btn" id="surpriseBtn" disabled>Loading...</button>
+<button class="cake-btn" id="cakeBtn" disabled>Loading...</button>
 </div>
 </div>
 
@@ -154,16 +162,12 @@ Designed & Developed by <b>Dev AngKur</b>
 
 <script>
 
-let defaultData = {
-name:"Elora Jannat",
-nickname:"Mashkura",
-birthday:"2009-03-09",
-heroTitle:"Happy Birthday",
-surpriseButton:"Open Your Surprise ✨",
-cakeButton:"Cut Your Cake 🎂"
-};
+let surpriseBtn = document.getElementById("surpriseBtn");
+let cakeBtn = document.getElementById("cakeBtn");
 
-let data = JSON.parse(localStorage.getItem("siteData")) || defaultData;
+fetch("data.json")
+.then(res => res.json())
+.then(data => {
 
 document.getElementById("heroTitle").innerHTML =
 data.heroTitle + "<br>" + data.name + "<br>— " + data.nickname + " —";
@@ -175,14 +179,25 @@ let age = today.getFullYear() - birthDate.getFullYear();
 document.getElementById("ageText").innerText =
 "You are " + age + " years old today ✨";
 
-document.getElementById("surpriseBtn").innerText = data.surpriseButton;
-document.getElementById("cakeBtn").innerText = data.cakeButton;
+surpriseBtn.innerText = data.surpriseButton;
+cakeBtn.innerText = data.cakeButton;
 
-document.getElementById("surpriseBtn").onclick = function(){
+/* Enable buttons after load */
+surpriseBtn.disabled = false;
+cakeBtn.disabled = false;
+
+})
+.catch(err=>{
+console.error("Error loading data.json", err);
+document.getElementById("heroTitle").innerText = "Happy Birthday 💖";
+});
+
+/* Navigation */
+surpriseBtn.onclick = function(){
 window.location.href = "surprise.html";
 };
 
-document.getElementById("cakeBtn").onclick = function(){
+cakeBtn.onclick = function(){
 window.location.href = "cake.html";
 };
 
