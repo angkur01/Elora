@@ -9,11 +9,7 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-
-html,body{
-height:100%;
-overflow:hidden;
-}
+html,body{height:100%;overflow:hidden;}
 
 body{
 min-height:100svh;
@@ -41,7 +37,6 @@ from{transform:translateY(100vh) scale(0.8);}
 to{transform:translateY(-10vh) scale(1.2);}
 }
 
-/* Card */
 .wrapper{
 width:92%;
 max-width:720px;
@@ -55,7 +50,6 @@ flex-direction:column;
 position:relative;
 }
 
-/* Fade-in Title */
 h1{
 font-family:'Playfair Display',serif;
 text-align:center;
@@ -65,11 +59,8 @@ opacity:0;
 animation:fadeTitle 1.2s ease forwards;
 }
 
-@keyframes fadeTitle{
-to{opacity:1;}
-}
+@keyframes fadeTitle{to{opacity:1;}}
 
-/* Scrollable Letter */
 .letter{
 flex:1;
 overflow-y:auto;
@@ -77,9 +68,7 @@ padding-right:6px;
 scrollbar-width:thin;
 }
 
-.letter::-webkit-scrollbar{
-width:6px;
-}
+.letter::-webkit-scrollbar{width:6px;}
 .letter::-webkit-scrollbar-thumb{
 background:#e8a0bf;
 border-radius:10px;
@@ -92,7 +81,6 @@ font-size:15px;
 color:#333;
 }
 
-/* Cursor */
 .cursor{
 display:inline-block;
 width:2px;
@@ -135,7 +123,7 @@ color:#555;
 
 <div class="wrapper">
 
-<h1 id="surpriseTitle"></h1>
+<h1 id="surpriseTitle">Loading...</h1>
 
 <div class="letter" id="letterBox">
 <span id="typedText"></span><span class="cursor"></span>
@@ -155,7 +143,22 @@ Designed & Developed by <b>Dev AngKur</b>
 src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_8f43a0c09b.mp3?filename=keyboard-typing-110399.mp3"
 preload="auto"></audio>
 
-<script>
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAqjJdmgZoxn4b_SYcq4jCupkgOw2B6WAc",
+  authDomain: "elora-birthday.firebaseapp.com",
+  projectId: "elora-birthday",
+  storageBucket: "elora-birthday.firebasestorage.app",
+  messagingSenderId: "34536952055",
+  appId: "1:34536952055:web:388846fa6e28026a2a43f2"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 /* Floating hearts */
 for(let i=0;i<18;i++){
@@ -168,10 +171,13 @@ heart.style.fontSize=(Math.random()*8+12)+"px";
 document.body.appendChild(heart);
 }
 
-/* Fetch global data */
-fetch("data.json")
-.then(res => res.json())
-.then(data => {
+async function loadSurprise(){
+
+try{
+const snap = await getDoc(doc(db, "birthday", "main"));
+if(!snap.exists()) throw new Error("No data found");
+
+const data = snap.data();
 
 document.getElementById("surpriseTitle").innerText = data.surpriseTitle;
 
@@ -181,32 +187,34 @@ let letterBox = document.getElementById("letterBox");
 let typingSound = document.getElementById("typingSound");
 
 let i = 0;
-let speed = 18; // balanced fast typing
+let speed = 18;
 
 function typeWriter(){
 if(i < text.length){
+
 typedText.innerHTML += text.charAt(i);
 
-/* Play sound softly */
-if(i % 3 === 0){ // prevent audio overlap spam
+if(i % 3 === 0){
 typingSound.currentTime = 0;
 typingSound.play().catch(()=>{});
 }
 
 i++;
 letterBox.scrollTop = letterBox.scrollHeight;
-
 setTimeout(typeWriter, speed);
 }
 }
 
-/* Start after title fade */
-setTimeout(typeWriter,1200);
+setTimeout(typeWriter, 1200);
 
-})
-.catch(err=>{
-console.error("Error loading data.json", err);
-});
+}catch(error){
+console.error(error);
+document.getElementById("surpriseTitle").innerText="For You 💌";
+}
+
+}
+
+loadSurprise();
 
 </script>
 

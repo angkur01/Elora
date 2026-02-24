@@ -7,11 +7,7 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-
-html,body{
-height:100%;
-overflow:hidden;
-}
+html,body{height:100%;overflow:hidden;}
 
 body{
 min-height:100svh;
@@ -204,54 +200,77 @@ preload="auto"></audio>
 
 <a href="index.html" class="back">Go Back</a>
 
-<script>
+<script type="module">
 
-let flame=document.getElementById("flame");
-let instruction=document.getElementById("instruction");
-let knife=document.getElementById("knife");
-let cakeTop=document.getElementById("cakeTop");
-let cakeBottom=document.getElementById("cakeBottom");
-let success=document.getElementById("successMsg");
-let bgMusic=document.getElementById("bgMusic");
-let cutSound=document.getElementById("cutSound");
-let cake=document.getElementById("cake");
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-let candleBlown=false;
-let cakeCut=false;
+const firebaseConfig = {
+  apiKey: "AIzaSyAqjJdmgZoxn4b_SYcq4jCupkgOw2B6WAc",
+  authDomain: "elora-birthday.firebaseapp.com",
+  projectId: "elora-birthday",
+  storageBucket: "elora-birthday.firebasestorage.app",
+  messagingSenderId: "34536952055",
+  appId: "1:34536952055:web:388846fa6e28026a2a43f2"
+};
 
-/* Load cake name from data.json */
-fetch("data.json")
-.then(res=>res.json())
-.then(data=>{
-cakeTop.innerText=data.cakeName;
-})
-.catch(()=>{
-cakeTop.innerText="Princess 💖";
-});
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const flame = document.getElementById("flame");
+const instruction = document.getElementById("instruction");
+const knife = document.getElementById("knife");
+const cakeTop = document.getElementById("cakeTop");
+const cakeBottom = document.getElementById("cakeBottom");
+const success = document.getElementById("successMsg");
+const bgMusic = document.getElementById("bgMusic");
+const cutSound = document.getElementById("cutSound");
+const cake = document.getElementById("cake");
+
+let candleBlown = false;
+let cakeCut = false;
+let musicVolume = 0.4;
+
+/* Load Firestore data */
+async function loadData(){
+  try{
+    const snap = await getDoc(doc(db,"birthday","main"));
+    if(!snap.exists()) throw new Error("No data");
+
+    const data = snap.data();
+
+    cakeTop.innerText = data.cakeName || "Princess 💖";
+    musicVolume = data.musicVolume ?? 0.4;
+
+  }catch(e){
+    cakeTop.innerText = "Princess 💖";
+  }
+}
+
+loadData();
 
 /* Blow candle */
 flame.addEventListener("click",()=>{
-if(candleBlown) return;
+  if(candleBlown) return;
 
-flame.style.display="none";
-instruction.innerText="Now long press to cut 🎂";
-candleBlown=true;
+  flame.style.display="none";
+  instruction.innerText="Now long press to cut 🎂";
+  candleBlown=true;
 
-/* Start music after user interaction (mobile safe) */
-bgMusic.volume=0.4;
-bgMusic.play().catch(()=>{});
+  bgMusic.volume = musicVolume;
+  bgMusic.play().catch(()=>{});
 });
 
 /* Long press */
 let holdTimer;
 
 function startHold(){
-if(!candleBlown || cakeCut) return;
-holdTimer=setTimeout(cutCake,800);
+  if(!candleBlown || cakeCut) return;
+  holdTimer=setTimeout(cutCake,800);
 }
 
 function cancelHold(){
-clearTimeout(holdTimer);
+  clearTimeout(holdTimer);
 }
 
 cake.addEventListener("mousedown",startHold);
@@ -261,30 +280,30 @@ cake.addEventListener("touchstart",startHold);
 cake.addEventListener("touchend",cancelHold);
 
 function cutCake(){
-if(cakeCut) return;
-cakeCut=true;
+  if(cakeCut) return;
+  cakeCut=true;
 
-knife.style.transform="translateX(-180px) rotate(-20deg)";
-cutSound.play().catch(()=>{});
+  knife.style.transform="translateX(-180px) rotate(-20deg)";
+  cutSound.play().catch(()=>{});
 
-cakeTop.classList.add("split-left");
-cakeBottom.classList.add("split-right");
+  cakeTop.classList.add("split-left");
+  cakeBottom.classList.add("split-right");
 
-setTimeout(()=>{
-success.style.opacity="1";
-burstConfetti();
-},800);
+  setTimeout(()=>{
+    success.style.opacity="1";
+    burstConfetti();
+  },800);
 }
 
 function burstConfetti(){
-for(let i=0;i<35;i++){
-let conf=document.createElement("div");
-conf.classList.add("confetti");
-conf.style.left=Math.random()*100+"vw";
-conf.style.background=`hsl(${Math.random()*360},70%,60%)`;
-conf.style.animationDuration=(Math.random()*2+2)+"s";
-document.body.appendChild(conf);
-}
+  for(let i=0;i<35;i++){
+    let conf=document.createElement("div");
+    conf.classList.add("confetti");
+    conf.style.left=Math.random()*100+"vw";
+    conf.style.background=`hsl(${Math.random()*360},70%,60%)`;
+    conf.style.animationDuration=(Math.random()*2+2)+"s";
+    document.body.appendChild(conf);
+  }
 }
 
 </script>

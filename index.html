@@ -8,11 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
+*{margin:0;padding:0;box-sizing:border-box;}
 
 html,body{
 height:100%;
@@ -29,7 +25,7 @@ align-items:center;
 position:relative;
 }
 
-/* Soft animated glow */
+/* Glow */
 body::before{
 content:"";
 position:absolute;
@@ -129,16 +125,11 @@ padding:0 10px;
 }
 
 @keyframes fadeIn{
-to{
-opacity:1;
-}
+to{opacity:1;}
 }
 
-/* Extra small screens */
 @media (max-height:600px){
-.container{
-transform:scale(0.95);
-}
+.container{transform:scale(0.95);}
 }
 </style>
 </head>
@@ -147,7 +138,6 @@ transform:scale(0.95);
 
 <div class="container">
 <h1 id="heroTitle">Loading...</h1>
-
 <p class="age" id="ageText"></p>
 
 <div class="buttons">
@@ -160,46 +150,63 @@ transform:scale(0.95);
 Designed & Developed by <b>Dev AngKur</b>
 </div>
 
-<script>
+<!-- FIREBASE SCRIPT -->
+<script type="module">
 
-let surpriseBtn = document.getElementById("surpriseBtn");
-let cakeBtn = document.getElementById("cakeBtn");
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-fetch("data.json")
-.then(res => res.json())
-.then(data => {
-
-document.getElementById("heroTitle").innerHTML =
-data.heroTitle + "<br>" + data.name + "<br>— " + data.nickname + " —";
-
-const birthDate = new Date(data.birthday);
-const today = new Date();
-let age = today.getFullYear() - birthDate.getFullYear();
-
-document.getElementById("ageText").innerText =
-"You are " + age + " years old today ✨";
-
-surpriseBtn.innerText = data.surpriseButton;
-cakeBtn.innerText = data.cakeButton;
-
-/* Enable buttons after load */
-surpriseBtn.disabled = false;
-cakeBtn.disabled = false;
-
-})
-.catch(err=>{
-console.error("Error loading data.json", err);
-document.getElementById("heroTitle").innerText = "Happy Birthday 💖";
-});
-
-/* Navigation */
-surpriseBtn.onclick = function(){
-window.location.href = "surprise.html";
+const firebaseConfig = {
+  apiKey: "AIzaSyAqjJdmgZoxn4b_SYcq4jCupkgOw2B6WAc",
+  authDomain: "elora-birthday.firebaseapp.com",
+  projectId: "elora-birthday",
+  storageBucket: "elora-birthday.firebasestorage.app",
+  messagingSenderId: "34536952055",
+  appId: "1:34536952055:web:388846fa6e28026a2a43f2"
 };
 
-cakeBtn.onclick = function(){
-window.location.href = "cake.html";
-};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const surpriseBtn = document.getElementById("surpriseBtn");
+const cakeBtn = document.getElementById("cakeBtn");
+
+async function loadData() {
+  try {
+    const snap = await getDoc(doc(db, "birthday", "main"));
+
+    if (!snap.exists()) {
+      throw new Error("No data found");
+    }
+
+    const data = snap.data();
+
+    document.getElementById("heroTitle").innerHTML =
+      data.heroTitle + "<br>" + data.name + "<br>— " + data.nickname + " —";
+
+    const birthDate = new Date(data.birthday);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+
+    document.getElementById("ageText").innerText =
+      "You are " + age + " years old today ✨";
+
+    surpriseBtn.innerText = data.surpriseButton;
+    cakeBtn.innerText = data.cakeButton;
+
+    surpriseBtn.disabled = false;
+    cakeBtn.disabled = false;
+
+  } catch (error) {
+    console.error(error);
+    document.getElementById("heroTitle").innerText = "Happy Birthday 💖";
+  }
+}
+
+loadData();
+
+surpriseBtn.onclick = () => location.href = "surprise.html";
+cakeBtn.onclick = () => location.href = "cake.html";
 
 </script>
 

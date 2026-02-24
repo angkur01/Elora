@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Birthday Admin Panel</title>
+<title>Birthday Admin 👑</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
@@ -50,10 +50,7 @@ color:white;
 font-size:14px;
 }
 
-textarea{
-min-height:100px;
-resize:none;
-}
+textarea{min-height:100px;}
 
 button{
 margin-top:20px;
@@ -66,19 +63,38 @@ font-weight:600;
 cursor:pointer;
 }
 
-pre{
-margin-top:20px;
-background:#000;
-padding:15px;
-border-radius:10px;
-overflow:auto;
-max-height:250px;
-font-size:12px;
+.logout-btn{
+background:#444;
+margin-left:10px;
 }
 
-.copy-btn{
-background:#1c1c1c;
-margin-left:10px;
+.preview{
+margin-top:15px;
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+}
+
+.image-box{
+position:relative;
+}
+
+.preview img{
+width:100px;
+border-radius:10px;
+}
+
+.delete-btn{
+background:red;
+border:none;
+color:white;
+border-radius:50%;
+width:22px;
+height:22px;
+cursor:pointer;
+position:absolute;
+top:-5px;
+right:-5px;
 }
 </style>
 </head>
@@ -116,56 +132,195 @@ margin-left:10px;
 <label>Cake Name</label>
 <input id="cakeName">
 
-<button onclick="generate()">Generate JSON</button>
-<button class="copy-btn" onclick="copyJSON()">Copy JSON</button>
+<label>Upload Photos (Surprise Page)</label>
+<input type="file" id="fileInput" multiple accept="image/*">
 
-<pre id="output"></pre>
+<div class="preview" id="preview"></div>
+
+<button onclick="saveData()">Save Changes</button>
+<button class="logout-btn" onclick="logout()">Logout</button>
 
 </div>
 
-<script>
+<script type="module">
 
-let currentData = {};
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { 
+  getAuth, 
+  signInWithEmailAndPassword, 
+  onAuthStateChanged,
+  signOut 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-fetch("data.json")
-.then(res=>res.json())
-.then(data=>{
-currentData = data;
-load();
-})
-.catch(()=>{
-console.log("No data.json found");
-});
+import { 
+  getFirestore, 
+  doc, 
+  setDoc, 
+  getDoc 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-function load(){
-for(let key in currentData){
-if(document.getElementById(key)){
-document.getElementById(key).value = currentData[key];
-}
-}
-}
-
-function generate(){
-let newData = {
-heroTitle: heroTitle.value,
-name: name.value,
-nickname: nickname.value,
-birthday: birthday.value,
-surpriseButton: surpriseButton.value,
-cakeButton: cakeButton.value,
-surpriseTitle: surpriseTitle.value,
-surpriseMessage: surpriseMessage.value,
-cakeName: cakeName.value
+const firebaseConfig = {
+  apiKey: "AIzaSyAqjJdmgZoxn4b_SYcq4jCupkgOw2B6WAc",
+  authDomain: "elora-birthday.firebaseapp.com",
+  projectId: "elora-birthday",
+  storageBucket: "elora-birthday.firebasestorage.app",
+  messagingSenderId: "34536952055",
+  appId: "1:34536952055:web:388846fa6e28026a2a43f2"
 };
 
-document.getElementById("output").textContent =
-JSON.stringify(newData,null,2);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null;
+let images = [];
+
+/* 🔐 LOGIN OVERLAY */
+document.body.insertAdjacentHTML("afterbegin", `
+<div id="loginBox" style="
+position:fixed;
+inset:0;
+background:#111;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:9999;">
+<div style="background:#222;padding:30px;border-radius:15px;width:300px;">
+<h3 style="margin-bottom:15px;text-align:center;">Admin Login 🔐</h3>
+<input id="email" placeholder="Email" style="width:100%;padding:8px;margin-bottom:10px;">
+<input id="password" type="password" placeholder="Password" style="width:100%;padding:8px;margin-bottom:15px;">
+<button id="loginBtn" style="width:100%;padding:10px;background:#ff4fa3;border:none;border-radius:10px;color:white;">Login</button>
+</div>
+</div>
+`);
+
+const loginBox = document.getElementById("loginBox");
+
+document.getElementById("loginBtn").onclick = async () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  try{
+    await signInWithEmailAndPassword(auth, email, password);
+  }catch(e){
+    alert("Login failed ❌");
+  }
+};
+
+onAuthStateChanged(auth, user => {
+  if(user){
+    currentUser = user;
+    loginBox.style.display = "none";
+    loadData();
+  } else {
+    currentUser = null;
+  }
+});
+
+/* ☁ Cloudinary */
+const CLOUD_NAME = "drbf0bgpw";
+const UPLOAD_PRESET = "birthday_unsigned";
+
+async function uploadImage(file){
+  document.body.style.cursor="wait";
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", UPLOAD_PRESET);
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+    { method:"POST", body:formData }
+  );
+
+  const data = await res.json();
+  document.body.style.cursor="default";
+
+  return data.secure_url;
 }
 
-function copyJSON(){
-let text = document.getElementById("output").textContent;
-navigator.clipboard.writeText(text);
-alert("JSON Copied! Paste into data.json 👑");
+document.getElementById("fileInput").addEventListener("change", async e=>{
+  const files = e.target.files;
+  for(let file of files){
+    const url = await uploadImage(file);
+    images.push(url);
+    renderImages();
+  }
+});
+
+function renderImages(){
+  const preview = document.getElementById("preview");
+  preview.innerHTML="";
+
+  images.forEach((img,index)=>{
+    const box=document.createElement("div");
+    box.className="image-box";
+
+    const image=document.createElement("img");
+    image.src=img;
+
+    const del=document.createElement("button");
+    del.className="delete-btn";
+    del.innerText="×";
+    del.onclick=()=>deleteImage(index);
+
+    box.appendChild(image);
+    box.appendChild(del);
+    preview.appendChild(box);
+  });
+}
+
+function deleteImage(index){
+  images.splice(index,1);
+  renderImages();
+}
+
+/* 💾 SAVE DATA */
+window.saveData = async function(){
+  if(!currentUser){
+    alert("Not authorized ❌");
+    return;
+  }
+
+  const siteData={
+    heroTitle:heroTitle.value,
+    name:name.value,
+    nickname:nickname.value,
+    birthday:birthday.value,
+    surpriseButton:surpriseButton.value,
+    cakeButton:cakeButton.value,
+    surpriseTitle:surpriseTitle.value,
+    surpriseMessage:surpriseMessage.value,
+    cakeName:cakeName.value,
+    musicVolume:0.4,
+    images:images
+  };
+
+  await setDoc(doc(db,"birthday","main"),siteData);
+  alert("Saved Securely 👑");
+}
+
+/* 📥 LOAD DATA */
+async function loadData(){
+  const snap=await getDoc(doc(db,"birthday","main"));
+  if(snap.exists()){
+    const data=snap.data();
+
+    Object.keys(data).forEach(key=>{
+      if(document.getElementById(key)){
+        document.getElementById(key).value=data[key];
+      }
+    });
+
+    images=data.images||[];
+    renderImages();
+  }
+}
+
+/* 🚪 LOGOUT */
+window.logout = async function(){
+  await signOut(auth);
+  location.reload();
 }
 
 </script>
